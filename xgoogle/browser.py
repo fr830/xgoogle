@@ -13,6 +13,7 @@ import socket
 import urllib
 import urllib2
 import httplib
+import cookielib
 
 BROWSERS = (
     # Top most popular browsers in my access.log on 2009.02.12
@@ -78,15 +79,27 @@ class Browser(object):
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
             'Accept-Language': 'en-us,en;q=0.5'
         }
+
         self.debug = debug
+        self._cj = cookielib.CookieJar()
+
+        self.handlers = [PoolHTTPHandler]
+        self.handlers.append(urllib2.HTTPCookieProcessor(self._cj))
+
+        self.opener = urllib2.build_opener(*self.handlers)
+        self.opener.addheaders = []
+
+        try:
+            conn = self.opener.open("http://www.google.com/ncr")
+            conn.info()  # retrieve session cookie
+        except Exception, e:
+            print e 
 
     def get_page(self, url, data=None):
-        handlers = [PoolHTTPHandler]
-        opener = urllib2.build_opener(*handlers)
         if data: data = urllib.urlencode(data)
         request = urllib2.Request(url, data, self.headers)
         try:
-            response = opener.open(request)
+            response = self.opener.open(request)
             return response.read()
         except (urllib2.HTTPError, urllib2.URLError), e:
             raise BrowserError(url, str(e))

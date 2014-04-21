@@ -41,21 +41,39 @@ class ParseError(SearchError):
         return self.tag.prettify()
 
 class SearchResult:
-    def __init__(self, title, url, desc):
+    def __init__(self, title='', url='', content=''):
         self.title = title
         self.url = url
-        self.desc = desc
+        self.content = content
+
+    def getURL(self):
+        return self.url
+
+    def setURL(self, url):
+        self.url = url 
+
+    def getTitle(self):
+        return self.title
+
+    def setTitle(self, title):
+        self.title = title
+
+    def getContent(self):
+        return self.content
+
+    def setContent(self, content):
+        self.content = content
 
     def __str__(self):
-        return 'Google Search Result: "%s"' % self.title
+        return '[Google]: %s' % self.url
 
 class GoogleSearch(object):
-    SEARCH_URL_0 = "http://www.google.%(tld)s/search?hl=%(lang)s&q=%(query)s&btnG=Google+Search"
-    NEXT_PAGE_0 = "http://www.google.%(tld)s/search?hl=%(lang)s&q=%(query)s&start=%(start)d"
-    SEARCH_URL_1 = "http://www.google.%(tld)s/search?hl=%(lang)s&q=%(query)s&num=%(num)d&btnG=Google+Search"
-    NEXT_PAGE_1 = "http://www.google.%(tld)s/search?hl=%(lang)s&q=%(query)s&num=%(num)d&start=%(start)d"
+    SEARCH_URL_0 = "https://www.google.%(tld)s/search?hl=%(lang)s&q=%(query)s&btnG=Google+Search"
+    NEXT_PAGE_0 = "https://www.google.%(tld)s/search?hl=%(lang)s&q=%(query)s&start=%(start)d"
+    SEARCH_URL_1 = "https://www.google.%(tld)s/search?hl=%(lang)s&q=%(query)s&num=%(num)d&btnG=Google+Search"
+    NEXT_PAGE_1 = "https://www.google.%(tld)s/search?hl=%(lang)s&q=%(query)s&num=%(num)d&start=%(start)d"
 
-    def __init__(self, query, random_agent=False, debug=False, lang="en", tld="com", re_search_strings=None):
+    def __init__(self, query, random_agent=True, debug=False, lang="zh-cn", tld="com.hk", re_search_strings=None):
         self.query = query
         self.debug = debug
         self.browser = Browser(debug=debug)
@@ -261,12 +279,17 @@ class GoogleSearch(object):
             self._maybe_raise(ParseError, "Description tag in Google search result was not found", result)
             return None
 
+        desc_div = desc_div.find('span', {'class': re.compile(r'\bst\b')})
+        if not desc_div:
+            self._maybe_raise(ParseError, "Description tag in Google search result was not found", result)
+            return None
+
         desc_strs = []
         def looper(tag):
             if not tag: return
             for t in tag:
                 try:
-                    if t.name == 'br': break
+                    if t.name == 'br': continue
                 except AttributeError:
                     pass
 
