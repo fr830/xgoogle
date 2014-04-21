@@ -1,3 +1,46 @@
+The first author of this program is Peteris Krumins, but there are some problems
+
+1, for Chinese support some of the problems,
+2, based on the key search will return failure, such as "inurl:asp? Id=1" will return failure.
+3, the returned result is not complete
+
+Therefore, repair the bug, 1 and 3 modification is very simple, 
+keyword search research for a long time, after compared with sqlmap program, 
+keyword search Google control is very strict, verify the need to join the cookie
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+****************************************************************************************
+
 This is a Google library called 'xgoogle'. Current version is 1.3.
 
 It's written by Peteris Krumins (peter@catonmat.net).
